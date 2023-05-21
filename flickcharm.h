@@ -22,9 +22,12 @@
 ****************************************************************************/
 #ifndef FLICKCHARM_H
 #define FLICKCHARM_H
+
 #include <QObject>
+
 class FlickCharmPrivate;
 class QWidget;
+
 class FlickCharm: public QObject
 {
     Q_OBJECT
@@ -39,4 +42,5 @@ protected:
 private:
     FlickCharmPrivate *d;
 };
+
 #endif // FLICKCHARM_H

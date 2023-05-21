@@ -46,27 +46,28 @@ struct FlickData {
     QPoint speed;
     QList<QEvent*> ignored;
 };
+
 class FlickCharmPrivate
 {
 public:
     QHash<QWidget*, FlickData*> flickData;
     QBasicTimer ticker;
 };
+
 FlickCharm::FlickCharm(QObject *parent): QObject(parent)
 {
     d = new FlickCharmPrivate;
 }
+
 FlickCharm::~FlickCharm()
 {
     delete d;
 }
+
 void FlickCharm::activateOn(QWidget *widget)
 {
-#if defined(Q_OS_SYMBIAN) || defined(Q_OS_WINCE)
     QAbstractScrollArea *scrollArea = dynamic_cast<QAbstractScrollArea*>(widget);
     if (scrollArea) {
-        //scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        //scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         QWidget *viewport = scrollArea->viewport();
         viewport->installEventFilter(this);
         scrollArea->installEventFilter(this);
@@ -76,11 +77,10 @@ void FlickCharm::activateOn(QWidget *widget)
         d->flickData[viewport]->state = FlickData::Steady;
         return;
     }
+
 //    QWebView *webView = dynamic_cast<QWebView*>(widget);
 //    if (webView) {
 //        QWebFrame *frame = webView->page()->mainFrame();
-//        //frame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
-//        //frame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
 //        webView->installEventFilter(this);
 //        d->flickData.remove(webView);
 //        d->flickData[webView] = new FlickData;
@@ -91,11 +91,10 @@ void FlickCharm::activateOn(QWidget *widget)
 
     qWarning() << "FlickCharm only works on QAbstractScrollArea (and derived classes)";
 //    qWarning() << "or QWebView (and derived classes)";
-#endif
 }
+
 void FlickCharm::deactivateFrom(QWidget *widget)
 {
-#if defined(Q_OS_SYMBIAN) || defined(Q_OS_WINCE)
     QAbstractScrollArea *scrollArea = dynamic_cast<QAbstractScrollArea*>(widget);
     if (scrollArea) {
         QWidget *viewport = scrollArea->viewport();
@@ -105,6 +104,7 @@ void FlickCharm::deactivateFrom(QWidget *widget)
         d->flickData.remove(viewport);
         return;
     }
+
 //    QWebView *webView = dynamic_cast<QWebView*>(widget);
 //    if (webView) {
 //        webView->removeEventFilter(this);
@@ -112,8 +112,8 @@ void FlickCharm::deactivateFrom(QWidget *widget)
 //        d->flickData.remove(webView);
 //        return;
 //    }
-#endif
 }
+
 static QPoint scrollOffset(QWidget *widget)
 {
     int x = 0, y = 0;
@@ -122,14 +122,17 @@ static QPoint scrollOffset(QWidget *widget)
         x = scrollArea->horizontalScrollBar()->value();
         y = scrollArea->verticalScrollBar()->value();
     }
+
 //    QWebView *webView = dynamic_cast<QWebView*>(widget);
 //    if (webView) {
 //        QWebFrame *frame = webView->page()->mainFrame();
 //        x = frame->evaluateJavaScript("window.scrollX").toInt();
 //        y = frame->evaluateJavaScript("window.scrollY").toInt();
 //    }
+
     return QPoint(x, y);
 }
+
 static void setScrollOffset(QWidget *widget, const QPoint &p)
 {
     QAbstractScrollArea *scrollArea = dynamic_cast<QAbstractScrollArea*>(widget);
@@ -137,11 +140,13 @@ static void setScrollOffset(QWidget *widget, const QPoint &p)
         scrollArea->horizontalScrollBar()->setValue(p.x());
         scrollArea->verticalScrollBar()->setValue(p.y());
     }
+
 //    QWebView *webView = dynamic_cast<QWebView*>(widget);
 //    QWebFrame *frame = webView ? webView->page()->mainFrame() : 0;
 //    if (frame)
 //        frame->evaluateJavaScript(QString("window.scrollTo(%1,%2);").arg(p.x()).arg(p.y()));
 }
+
 static QPoint deaccelerate(const QPoint &speed, int a = 1, int max = 64)
 {
     int x = qBound(-max, speed.x(), max);
@@ -150,6 +155,7 @@ static QPoint deaccelerate(const QPoint &speed, int a = 1, int max = 64)
     y = (y == 0) ? y : (y > 0) ? qMax(0, y - a) : qMin(0, y + a);
     return QPoint(x, y);
 }
+
 bool FlickCharm::eventFilter(QObject *object, QEvent *event)
 {
     if (!object->isWidgetType())
@@ -245,6 +251,7 @@ bool FlickCharm::eventFilter(QObject *object, QEvent *event)
     }
     return consumed;
 }
+
 void FlickCharm::timerEvent(QTimerEvent *event)
 {
     int count = 0;
